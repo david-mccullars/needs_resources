@@ -18,21 +18,26 @@ module NeedsResources
     end
 
     def parse(file)
-      resources = {}.with_indifferent_access
-      return resources unless File.exist? file
+      return {} unless File.exist? file
 
       yaml = YAML.load_file(file)
       raise InvalidOrCorruptedResources unless yaml.is_a? Hash
 
-      yaml.each do |name, value|
+      parse_resources(yaml)
+    end
+
+    def parse_resources(hash)
+      resources = {}
+
+      hash.each do |name, value|
         prefix, type = parse_resource_name(name)
-        resources[name] = parse_resource_value(name, type, value)
+        resources[name.to_sym] = parse_resource_value(name, type, value)
 
         # Make sure both default_xyz and xyz are aliases
         if prefix == 'default_'
-          resources[type] ||= name.to_sym
+          resources[type.to_sym] ||= name.to_sym
         elsif prefix.nil?
-          resources[type] ||= "default_#{type}".to_sym
+          resources[type.to_sym] ||= "default_#{type}".to_sym
         end
       end
 
@@ -58,9 +63,13 @@ module NeedsResources
 
     def parse_resource_value(name, type, value)
       case value
-      when Symbol
+      when Symbol, String, Fixnum
         value
       when Hash
+        if value.has_key?("resources")
+          raise InvalidResourceValueError.new(name, value) unless value.is_a? Hash
+          value["resources"] = parse_resources value["resources"]
+        end
         ResourceType.children[type].new(value.merge :name => name)
       else
         raise InvalidResourceValueError.new(name, value)

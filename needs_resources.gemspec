@@ -14,6 +14,4 @@ Gem::Specification.new do |gem|
   gem.name = "needs_resources"
   gem.require_paths = ["lib"]
   gem.version = NeedsResources::VERSION
-
-  gem.add_dependency('active_support', '> 2.0')
 end

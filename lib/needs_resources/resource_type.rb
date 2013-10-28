@@ -2,21 +2,31 @@ module NeedsResources
   module ResourceType
 
     def self.included(base)
-      children[base.name.demodulize.underscore] = base
+      children[underscore(base.name)] = base
       base.instance_eval do
         def attr(*names)
           options = names.last.is_a?(Hash) ? names.pop : {}
           names.flatten.each do |n|
-            attributes[n] = options.with_indifferent_access
+            attributes[n.to_sym] = options
             attr_reader n
           end
         end
 
         def attributes
-          @attributes ||= {}.with_indifferent_access
+          @attributes ||= {}
         end
       end
       base.attr :name, :required => true
+    end
+
+    def self.underscore(name)
+      name = name.to_s.dup
+      name.gsub!(/^.*::/, '')
+      name.gsub!(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
+      name.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+      name.tr!("-", "_")
+      name.downcase!
+      name
     end
 
     def self.children
@@ -24,13 +34,12 @@ module NeedsResources
     end
 
     def initialize(args={})
-      args = args.with_indifferent_access
+      args = args.dup
       self.class.attributes.each do |name, options|
-        value = args.delete(name) || options[:default]
+        value = args.delete(name.to_s) || args.delete(name.to_sym) || options[:default]
         if options[:required] && value.nil?
           raise RequiredAttributeError.new(self, name)
         end
-        value = value.with_indifferent_access if value.is_a? Hash
         instance_variable_set "@#{name}", value
       end
       args.each do |k, v|

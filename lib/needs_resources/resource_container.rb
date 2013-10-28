@@ -2,7 +2,7 @@ module NeedsResources
   module ResourceContainer
 
     def [](name)
-      resources[name] or raise MissingResourceError.new(child_resource_name name)
+      resources[name.to_sym] or raise MissingResourceError.new(child_resource_name name)
     end
 
     def child_resource_name(child_name)
@@ -14,7 +14,7 @@ module NeedsResources
     end
 
     def resources
-      @resources ||= {}.with_indifferent_access
+      @resources ||= {}
     end
 
     def resources_needed

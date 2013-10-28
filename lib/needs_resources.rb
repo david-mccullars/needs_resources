@@ -1,6 +1,4 @@
 require 'set'
-require 'active_support'
-require 'active_support/core_ext'
 
 module NeedsResources
 
@@ -18,7 +16,7 @@ module NeedsResources
   alias :needs_resource :needs_resources
 
   def self.ensure_resources
-    if (missing = missing_resources).present?
+    if (missing = missing_resources).any?
       # TODO: maybe prompt user if missing?
       raise MissingResourceError.new(*missing)
     end
@@ -31,5 +29,5 @@ module NeedsResources
 end
 
 Dir[File.expand_path('../needs_resources/**/*.rb', __FILE__)].sort.each do |f|
-  require f
+  load f
 end
