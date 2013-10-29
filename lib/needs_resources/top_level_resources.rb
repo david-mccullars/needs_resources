@@ -7,10 +7,18 @@ module NeedsResources
     include Singleton
     include ResourceContainer
 
+    def add_default(name, args={})
+      defaults[name.to_sym] = args
+    end
+
     private
 
+    def defaults
+      @defaults ||= {}
+    end
+
     def resources
-      @resources ||= parse(resource_config_file)
+      @resources ||= parse_resources(defaults).merge parse(resource_config_file)
     end
 
     def resource_config_file

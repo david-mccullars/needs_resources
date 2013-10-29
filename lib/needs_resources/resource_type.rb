@@ -3,6 +3,7 @@ module NeedsResources
 
     def self.included(base)
       children[underscore(base.name)] = base
+
       base.instance_eval do
         def attr(*names)
           options = names.last.is_a?(Hash) ? names.pop : {}
@@ -12,10 +13,16 @@ module NeedsResources
           end
         end
 
+        def provide_top_level_instance(name=nil, args={})
+          name ||= ResourceType.underscore(self.name)
+          TopLevelResources.instance.add_default(name, args)
+        end
+
         def attributes
           @attributes ||= {}
         end
       end
+
       base.attr :name, :required => true
     end
 
