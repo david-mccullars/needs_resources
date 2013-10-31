@@ -5,10 +5,15 @@ module NeedsResources
   class TopLevelResources
 
     include Singleton
+    include Enumerable
     include ResourceContainer
 
     def add_default(name, args={})
       defaults[name.to_sym] = args
+    end
+
+    def each(&block)
+      resources.each(&block)
     end
 
     private

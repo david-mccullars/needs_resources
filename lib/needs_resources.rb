@@ -26,6 +26,12 @@ module NeedsResources
     TopLevelResources.instance.missing_resources
   end
 
+  extend Enumerable
+
+  def self.each(&block)
+    TopLevelResources.instance.each(&block)
+  end
+
 end
 
 Dir[File.expand_path('../needs_resources/**/*.rb', __FILE__)].sort.each do |f|
