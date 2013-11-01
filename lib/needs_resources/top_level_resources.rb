@@ -50,7 +50,7 @@ module NeedsResources
         if prefix == 'default_'
           resources[type.to_sym] ||= name.to_sym
         elsif prefix.nil?
-          resources[type.to_sym] ||= "default_#{type}".to_sym
+          resources["default_#{type}".to_sym] ||= name.to_sym
         end
       end
 
