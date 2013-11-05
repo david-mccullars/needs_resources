@@ -31,7 +31,7 @@ module NeedsResources
     end
 
     def parse(file)
-      return {} unless File.exist? file
+      return {} unless file && File.exist? file
 
       yaml = YAML.load_file(file)
       raise InvalidOrCorruptedResources unless yaml.is_a? Hash
