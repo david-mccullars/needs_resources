@@ -5,6 +5,14 @@ module NeedsResources
       resources[name.to_sym] or raise MissingResourceError.new(child_resource_name name)
     end
 
+    def []=(name, hash)
+      resources.merge! TopLevelResources.instance.send(:parse_resources, name.to_sym => hash)
+    end
+
+    def has_resource?(name)
+      resources.has_key? name.to_sym
+    end
+
     def child_resource_name(child_name)
       if respond_to?(:name)
         "#{self.name}.#{child_name}"
@@ -19,6 +27,15 @@ module NeedsResources
 
     def resources_needed
       @resources_needed ||= Set.new
+    end
+
+    def resources_hash
+      hash = {}
+      resources.sort_by { |k, v| "#{v.class}___#{k}" }.each do |k, v|
+        next if k.to_s.starts_with? 'default_'
+        hash[k.to_s] = v.respond_to?(:to_hash) ? v.to_hash : v
+      end
+      hash
     end
 
     def missing_resources

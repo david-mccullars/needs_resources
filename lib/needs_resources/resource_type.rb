@@ -8,7 +8,7 @@ module NeedsResources
         def attr(*names)
           options = names.last.is_a?(Hash) ? names.pop : {}
           names.flatten.each do |n|
-            attributes[n.to_sym] = options
+            attributes[n.to_sym] = options.dup
             attr_reader n
           end
         end
@@ -43,7 +43,7 @@ module NeedsResources
     def initialize(args={})
       args = args.dup
       self.class.attributes.each do |name, options|
-        value = args.delete(name.to_s) || args.delete(name.to_sym) || options[:default]
+        value = args.delete(name.to_s) || args.delete(name.to_sym) || options[:default].dup
         if options[:required] && value.nil?
           raise RequiredAttributeError.new(self, name)
         end
@@ -52,6 +52,19 @@ module NeedsResources
       args.each do |k, v|
         warn "Invalid initializer argument (#{k.inspect}) for class #{self}"
       end
+    end
+
+     def to_hash
+      hash = {}
+      simple_atts = self.class.attributes.keys - [:name, :resources]
+      simple_atts.each do |a|
+        v = instance_variable_get("@#{a}")
+        hash[a.to_s] = v.respond_to?(:to_hash) ? v.to_hash : v
+      end
+      if respond_to?(:resources_hash)
+        hash.merge! "resources" => resources_hash
+      end
+      hash
     end
 
   end

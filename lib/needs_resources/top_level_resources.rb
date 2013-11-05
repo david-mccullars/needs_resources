@@ -16,6 +16,8 @@ module NeedsResources
       resources.each(&block)
     end
 
+    alias :to_hash :resources_hash
+
     private
 
     def defaults

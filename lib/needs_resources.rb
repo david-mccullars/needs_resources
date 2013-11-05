@@ -2,8 +2,11 @@ require 'set'
 
 module NeedsResources
 
+  def container
+    is_a?(ResourceContainer) ? self : TopLevelResources.instance
+  end
+
   def needs_resources(*names)
-    container = is_a?(ResourceContainer) ? self : TopLevelResources.instance
     names.flatten.each do |name|
       if is_a? Class
         define_method name, lambda { container[name] }
@@ -30,6 +33,10 @@ module NeedsResources
 
   def self.each(&block)
     TopLevelResources.instance.each(&block)
+  end
+
+  def self.to_hash
+    TopLevelResources.instance.to_hash
   end
 
 end
