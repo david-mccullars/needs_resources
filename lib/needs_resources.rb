@@ -7,6 +7,7 @@ module NeedsResources
   end
 
   def needs_resources(*names)
+    container = self.container
     names.flatten.each do |name|
       if is_a? Class
         define_method name, lambda { container[name] }
